@@ -1,0 +1,466 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Visualizador del DOM</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #263238;
+        }
+
+        header {
+            background: #263b53;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .contenedor {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            align-items: start;
+        }
+
+        .contenido {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #00000015;
+        }
+
+        .contenido h2 {
+            color: #245b85;
+        }
+
+        .contenido li {
+            margin-bottom: 8px;
+        }
+
+        .panel-dom {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #00000015;
+            position: sticky;
+            top: 15px;
+            min-width: 0;
+        }
+
+        .panel-dom h2 {
+            margin-top: 0;
+        }
+
+        button {
+            background: #1675bd;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        button:hover {
+            background: #10578e;
+        }
+
+        button:focus-visible {
+            outline: 3px solid #f0a000;
+            outline-offset: 3px;
+        }
+
+        .ayuda {
+            color: #596875;
+            font-size: 14px;
+        }
+
+        /* Contenedor con scroll horizontal y vertical */
+        .canvas-contenedor {
+            width: 100%;
+            height: 600px;
+            overflow: auto;
+            border: 1px solid #ccd5df;
+            border-radius: 6px;
+            background: #fafcff;
+        }
+
+        canvas {
+            display: block;
+            max-width: none;
+        }
+
+        @media (max-width: 800px) {
+            .contenedor {
+                grid-template-columns: 1fr;
+            }
+
+            .panel-dom {
+                position: static;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Visualizador de la estructura DOM</h1>
+        <p>Explora cómo está organizada una página HTML</p>
+    </header>
+
+    <main class="contenedor">
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <section class="contenido" id="contenido">
+
+            <h2>¿Qué es el DOM?</h2>
+
+            <p>
+                El DOM (Document Object Model) es una representación
+                estructurada del documento HTML. JavaScript puede
+                acceder a sus elementos y modificarlos.
+            </p>
+
+            <h2>Elementos de una página HTML</h2>
+
+            <p>
+                Una página web puede contener diferentes tipos
+                de elementos:
+            </p>
+
+            <ul>
+                <li>Encabezados y títulos.</li>
+                <li>Párrafos de texto.</li>
+                <li>Listas ordenadas y desordenadas.</li>
+                <li>Enlaces a otras páginas.</li>
+                <li>Imágenes y elementos multimedia.</li>
+            </ul>
+
+            <h2>Pasos para trabajar con el DOM</h2>
+
+            <ol>
+                <li>Seleccionar un elemento HTML.</li>
+                <li>Consultar sus propiedades.</li>
+                <li>Crear nuevos elementos.</li>
+                <li>Modificar el contenido de la página.</li>
+            </ol>
+
+            <h2>Ejemplo de código</h2>
+
+            <p>
+                Podemos seleccionar un elemento utilizando
+                <strong>document.querySelector()</strong>.
+            </p>
+
+            <p>
+                También podemos crear elementos con
+                <strong>document.createElement()</strong>.
+            </p>
+
+            <h2>Más información</h2>
+
+            <p>
+                Consulta la
+                <a href="https://developer.mozilla.org/es/docs/Web/API/Document_Object_Model">
+                    documentación del DOM en MDN
+                </a>
+                para aprender más.
+            </p>
+
+        </section>
+
+        <!-- PANEL LATERAL DEL DOM -->
+        <aside class="panel-dom">
+
+            <h2>Representación del DOM</h2>
+
+            <button id="mostrarDOM" type="button">
+                Mostrar DOM
+            </button>
+
+            <p class="ayuda">
+                Pulsa el botón para visualizar el árbol de elementos HTML.
+                Puedes desplazarte horizontal y verticalmente.
+            </p>
+
+            <div class="canvas-contenedor">
+
+                <canvas id="canvasDOM">
+                    Tu navegador no soporta canvas.
+                </canvas>
+
+            </div>
+
+        </aside>
+
+    </main>
+
+    <script>
+
+        const boton = document.getElementById("mostrarDOM");
+        const canvas = document.getElementById("canvasDOM");
+        const ctx = canvas.getContext("2d");
+
+        // CONFIGURACIÓN DE LOS NODOS
+
+        const altoNodo = 32;
+
+        const separacionHorizontal = 30;
+        const separacionVertical = 75;
+
+        const margen = 40;
+
+        // Fuente pequeña pero legible
+        const fuenteNodo = "bold 12px Arial";
+
+        // Espacio interior de las cajas
+        const paddingHorizontal = 12;
+
+        // EVENTO DEL BOTÓN
+
+        boton.addEventListener("click", function () {
+
+            // Obtenemos la estructura real del documento
+            const raiz = document.documentElement;
+
+            // Construimos el árbol DOM
+            function obtenerArbol(elemento) {
+
+                return {
+                    nombre: elemento.tagName.toLowerCase(),
+
+                    hijos: Array.from(elemento.children)
+                        .map(obtenerArbol)
+                };
+
+            }
+
+            const arbol = obtenerArbol(raiz);
+
+            // Establecemos la fuente antes de medir los textos
+            ctx.font = fuenteNodo;
+
+            // Calculamos la anchura de cada caja
+            function calcularAncho(nodo) {
+
+                // Medimos la etiqueta completa
+                const texto = "<" + nodo.nombre + ">";
+
+                const anchoTexto = ctx.measureText(texto).width;
+
+                // Anchura de la caja según su etiqueta
+                nodo.anchoCaja =
+                    Math.ceil(anchoTexto + paddingHorizontal * 2);
+
+                // Si tiene hijos, calculamos la anchura de su rama
+                if (nodo.hijos.length > 0) {
+
+                    let anchoHijos = 0;
+
+                    nodo.hijos.forEach(function (hijo) {
+
+                        anchoHijos += calcularAncho(hijo);
+
+                    });
+
+                    anchoHijos +=
+                        separacionHorizontal * (nodo.hijos.length - 1);
+
+                    // El espacio de la rama debe permitir colocar
+                    // todos sus hijos sin solapamientos
+                    nodo.ancho = Math.max(
+                        nodo.anchoCaja,
+                        anchoHijos
+                    );
+
+                } else {
+
+                    nodo.ancho = nodo.anchoCaja;
+
+                }
+
+                return nodo.ancho;
+
+            }
+
+            calcularAncho(arbol);
+
+            // Calculamos la profundidad del árbol
+            function calcularProfundidad(nodo) {
+
+                if (nodo.hijos.length === 0) {
+                    return 1;
+                }
+
+                return 1 + Math.max(
+                    ...nodo.hijos.map(calcularProfundidad)
+                );
+
+            }
+
+            const profundidad = calcularProfundidad(arbol);
+
+            // Calculamos las dimensiones necesarias del canvas
+            const anchoCanvas = Math.max(
+                900,
+                arbol.ancho + margen * 2
+            );
+
+            const altoCanvas =
+                profundidad * separacionVertical + margen * 2;
+
+            // Ajustamos la resolución según el dispositivo
+            const escala = window.devicePixelRatio || 1;
+
+            canvas.width = anchoCanvas * escala;
+            canvas.height = altoCanvas * escala;
+
+            // Tamaño visual del canvas
+            canvas.style.width = anchoCanvas + "px";
+            canvas.style.height = altoCanvas + "px";
+
+            // Aplicamos la escala
+            ctx.setTransform(
+                escala, 0,
+                0, escala,
+                0, 0
+            );
+
+            // Limpiamos el canvas
+            ctx.clearRect(
+                0,
+                0,
+                anchoCanvas,
+                altoCanvas
+            );
+
+            // DIBUJAMOS LAS CONEXIONES Y LOS NODOS
+
+            function dibujarNodo(nodo, x, y) {
+
+                const centroX = x + nodo.ancho / 2;
+
+                // Dibujamos primero las conexiones
+                if (nodo.hijos.length > 0) {
+
+                    const anchoTotal = nodo.hijos.reduce(
+                        (total, hijo) => total + hijo.ancho,
+                        0
+                    ) +
+                    separacionHorizontal * (nodo.hijos.length - 1);
+
+                    let hijoX = centroX - anchoTotal / 2;
+
+                    nodo.hijos.forEach(function (hijo) {
+
+                        const hijoCentroX =
+                            hijoX + hijo.ancho / 2;
+
+                        // Línea desde el padre hasta el hijo
+                        ctx.beginPath();
+
+                        ctx.moveTo(
+                            centroX,
+                            y + altoNodo
+                        );
+
+                        ctx.lineTo(
+                            centroX,
+                            y + altoNodo + separacionVertical / 2
+                        );
+
+                        ctx.lineTo(
+                            hijoCentroX,
+                            y + altoNodo + separacionVertical / 2
+                        );
+
+                        ctx.lineTo(
+                            hijoCentroX,
+                            y + separacionVertical
+                        );
+
+                        ctx.strokeStyle = "#8b9bad";
+                        ctx.lineWidth = 1.5;
+
+                        ctx.stroke();
+
+                        // Dibujamos el hijo
+                        dibujarNodo(
+                            hijo,
+                            hijoX,
+                            y + separacionVertical
+                        );
+
+                        hijoX +=
+                            hijo.ancho + separacionHorizontal;
+
+                    });
+
+                }
+
+                // DIBUJAMOS LA CAJA ADAPTADA AL TEXTO
+
+                const anchoCaja = nodo.anchoCaja;
+
+                const nodoX = centroX - anchoCaja / 2;
+
+                ctx.fillStyle = "#dceeff";
+                ctx.strokeStyle = "#1675bd";
+                ctx.lineWidth = 1.5;
+
+                ctx.beginPath();
+
+                ctx.roundRect(
+                    nodoX,
+                    y,
+                    anchoCaja,
+                    altoNodo,
+                    5
+                );
+
+                ctx.fill();
+                ctx.stroke();
+
+                // ESCRIBIMOS EL NOMBRE DE LA ETIQUETA
+
+                ctx.fillStyle = "#183b59";
+                ctx.font = fuenteNodo;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+
+                ctx.fillText(
+                    "<" + nodo.nombre + ">",
+                    centroX,
+                    y + altoNodo / 2
+                );
+
+            }
+
+            // Dibujamos el árbol empezando por la raíz
+            dibujarNodo(
+                arbol,
+                margen,
+                margen
+            );
+
+        });
+
+    </script>
+
+</body>
+</html>

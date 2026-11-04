@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generar página con JavaScript</title>
+</head>
+
+<body>
+    <!-- Botón que genera el contenido -->
+    <button id="generar">Generar página</button>
+
+    <script>
+        // Seleccionamos el botón
+        const boton = document.getElementById("generar");
+
+        // Escuchamos el evento click
+        boton.addEventListener("click", function () {
+
+            // Evitamos generar el contenido más de una vez
+            if (document.getElementById("contenido-generado")) {
+                return;
+            }
+
+            // Creamos un contenedor principal
+            const contenedor = document.createElement("main");
+            contenedor.id = "contenido-generado";
+
+            // Creamos un título
+            const titulo = document.createElement("h1");
+            titulo.textContent = "Mi página generada con JavaScript";
+
+            // Creamos un párrafo
+            const parrafo = document.createElement("p");
+            parrafo.textContent =
+                "Este contenido se ha creado dinámicamente al pulsar el botón.";
+
+            // Creamos una lista
+            const lista = document.createElement("ul");
+
+            const elementos = ["HTML", "CSS", "JavaScript"];
+
+            elementos.forEach(function (elemento) {
+                const item = document.createElement("li");
+                item.textContent = elemento;
+                lista.appendChild(item);
+            });
+
+            // Añadimos los elementos al contenedor
+            contenedor.appendChild(titulo);
+            contenedor.appendChild(parrafo);
+            contenedor.appendChild(lista);
+
+            // Añadimos el contenedor al body
+            document.body.appendChild(contenedor);
+
+            // Añadimos algo de estilo
+            contenedor.style.fontFamily = "Arial, sans-serif";
+            contenedor.style.padding = "20px";
+            contenedor.style.backgroundColor = "#f0f0f0";
+            contenedor.style.marginTop = "20px";
+        });
+    </script>
+</body>
+</html>

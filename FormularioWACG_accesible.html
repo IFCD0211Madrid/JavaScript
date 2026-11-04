@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de registro accesible</title>
+
+    <style>
+        /* =========================================
+           1. ESTILOS GENERALES
+        ========================================= */
+        * { box-sizing: border-box; }
+        :root {
+            color-scheme: light;
+            --fondo: #f5f5f5;
+            --superficie: #fff;
+            --texto: #222;
+            --texto-secundario: #333;
+            --borde: #555;
+            --enlace: #004b9b;
+            --primario: #005fcc;
+            --primario-hover: #003f8c;
+            --error: #a40018;
+            --foco: #005fcc;
+            --tamano-texto: 100%;
+        }
+        * { box-sizing: border-box; }
+        html { font-size: var(--tamano-texto); }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 2rem;
+            color: var(--texto);
+            background: var(--fondo);
+        }
+        body, input, button { font-size: 1rem; }
+        main { max-width: 760px; margin: auto; }
+        h1, h2, h3 { line-height: 1.3; }
+        a { color: var(--enlace); text-decoration: underline; text-underline-offset: .15em; }
+        a:hover { text-decoration-thickness: .18em; }
+        .salto-contenido {
+            position: absolute; left: .75rem; top: -5rem; z-index: 1000;
+            padding: .75rem 1rem; background: var(--superficie); color: var(--texto);
+            border: 2px solid var(--foco); border-radius: 4px;
+        }
+        .salto-contenido:focus { top: .75rem; }
+        .herramientas {
+            display: flex; flex-wrap: wrap; align-items: center; gap: .6rem;
+            padding: 1rem; margin: 1rem 0 1.5rem; background: var(--superficie);
+            border: 1px solid var(--borde); border-radius: 8px;
+        }
+        .herramientas strong { flex-basis: 100%; }
+        .herramientas button { padding: .55rem .8rem; }
+        .solo-lectores {
+            position: absolute !important; width: 1px; height: 1px; padding: 0;
+            margin: -1px; overflow: hidden; clip: rect(0,0,0,0);
+            white-space: nowrap; border: 0;
+        }
+
+        /* =========================================
+           2. FORMULARIO
+        ========================================= */
+        form {
+            padding: 2rem;
+            background: var(--superficie);
+            border: 1px solid var(--borde);
+            border-radius: 8px;
+        }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; font-weight: bold; margin-bottom: 0.4rem; }
+        input:not([type="checkbox"]) {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--borde);
+            border-radius: 4px;
+            font-size: 1rem;
+            background: var(--superficie);
+            color: var(--texto);
+            min-height: 44px;
+        }
+        input::placeholder { color: #555; opacity: 1; }
+        :focus-visible {
+            outline: 3px solid var(--foco) !important;
+            outline-offset: 3px;
+        }
+        input[aria-invalid="true"] { border: 3px solid var(--error); }
+        .required { color: var(--error); }
+        .help { display: block; margin-top: 0.3rem; font-size: .95rem; color: var(--texto-secundario); }
+        .error { display: block; color: var(--error); font-weight: bold; margin-top: .3rem; }
+        .error:empty { display: none; }
+        .resumen-errores {
+            padding: 1rem; margin: 1rem 0; border: 2px solid var(--error);
+            background: var(--superficie); color: var(--texto);
+        }
+        .resumen-errores:empty { display: none; }
+        .resumen-errores a { display: block; margin-top: .35rem; }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+        }
+        .checkbox-group input {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            margin-top: 0.2rem;
+        }
+        .checkbox-group label { margin: 0; }
+
+        /* =========================================
+           3. BOTONES
+        ========================================= */
+        button {
+            padding: 0.8rem 1.5rem;
+            background: var(--primario);
+            color: white;
+            border: 2px solid var(--primario);
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        button:hover:not(:disabled) { background: var(--primario-hover); border-color: var(--primario-hover); }
+        button:disabled { opacity: 0.55; cursor: not-allowed; }
+        #resultado { margin-top: 1rem; font-weight: bold; }
+
+        /* =========================================
+           4. VENTANA MODAL
+        ========================================= */
+        dialog {
+            width: min(90%, 650px);
+            max-height: 85vh;
+            padding: 0;
+            border: 2px solid #555;
+            border-radius: 8px;
+            color: var(--texto);
+            background: var(--superficie);
+        }
+        dialog::backdrop { background: rgb(0 0 0 / 65%); }
+        .modal-contenido { padding: 1.5rem; }
+        .texto-privacidad {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 1rem;
+            border: 1px solid #777;
+            border-radius: 4px;
+            margin: 1rem 0;
+            background: var(--superficie);
+            color: var(--texto);
+        }
+        .texto-privacidad:focus-visible { outline: 3px solid var(--foco); outline-offset: 3px; }
+        .acciones-modal { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+        .boton-secundario { background: var(--superficie); color: var(--texto); border-color: var(--borde); }
+        .boton-secundario:hover:not(:disabled) { background: var(--fondo); border-color: var(--texto); }
+        body.alto-contraste {
+            --fondo: #000; --superficie: #000; --texto: #fff;
+            --texto-secundario: #fff; --borde: #fff; --enlace: #ff0;
+            --primario: #ff0; --primario-hover: #ffd900; --error: #ff8080; --foco: #0ff;
+        }
+        body.alto-contraste button { color: #000; }
+        body.alto-contraste .boton-secundario { color: #fff; }
+        body.tema-oscuro {
+            --fondo: #171717; --superficie: #242424; --texto: #f5f5f5;
+            --texto-secundario: #e0e0e0; --borde: #aaa; --enlace: #9ecbff;
+            --primario: #145da0; --primario-hover: #0b477d; --error: #ff9aa8; --foco: #ffd166;
+        }
+        body.enlaces-subrayados a { text-decoration: underline !important; text-decoration-thickness: .15em !important; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+        }
+        @media (max-width: 600px) {
+            body { padding: 1rem; }
+            form { padding: 1rem; }
+            .modal-contenido { padding: 1rem; }
+            .acciones-modal { flex-direction: column; }
+            .acciones-modal button { width: 100%; }
+        }
+    </style>
+</head>
+
+<body>
+<a class="salto-contenido" href="#contenido">Saltar al contenido principal</a>
+<header class="herramientas" aria-label="Opciones de accesibilidad">
+    <strong>Opciones de visualización y lectura</strong>
+    <button type="button" id="aumentar-texto" aria-label="Aumentar tamaño del texto">Aumentar texto +</button>
+    <button type="button" id="reducir-texto" aria-label="Reducir tamaño del texto">Reducir texto −</button>
+    <button type="button" id="contraste" aria-pressed="false">Alto contraste</button>
+    <button type="button" id="oscuro" aria-pressed="false">Modo oscuro</button>
+    <button type="button" id="subrayar-enlaces" aria-pressed="false">Subrayar enlaces</button>
+    <button type="button" id="restablecer">Restablecer vista</button>
+    <span id="estado-vista" class="solo-lectores" role="status" aria-live="polite"></span>
+</header>
+<main id="contenido">
+    <h1>Formulario de registro</h1>
+    <form id="registro" novalidate aria-describedby="nota-obligatorios">
+        <p id="nota-obligatorios">Los campos marcados con <span class="required">*</span> son obligatorios.</p>
+        <div id="resumen-errores" class="resumen-errores" role="alert" tabindex="-1" aria-live="assertive"></div>
+        <!-- NOMBRE -->
+        <div class="form-group">
+            <label for="nombre">Nombre <span class="required">*</span></label>
+            <input type="text" id="nombre" name="nombre" placeholder="Ej. María" autocomplete="given-name" required minlength="2" maxlength="50" aria-describedby="ayuda-nombre error-nombre">
+            <small id="ayuda-nombre" class="help">Introduce tu nombre (entre 2 y 50 caracteres).</small>
+            <span id="error-nombre" class="error" aria-live="polite"></span>
+        </div>
+
+        <!-- APELLIDOS -->
+        <div class="form-group">
+            <label for="apellidos">Apellidos <span class="required">*</span></label>
+            <input type="text" id="apellidos" name="apellidos" placeholder="Ej. García López" autocomplete="family-name" required minlength="2" maxlength="100" aria-describedby="error-apellidos">
+            <span id="error-apellidos" class="error" aria-live="polite"></span>
+        </div>
+
+        <!-- EMAIL -->
+        <div class="form-group">
+            <label for="email">Correo electrónico <span class="required">*</span></label>
+            <input type="email" id="email" name="email" placeholder="Ej. usuario@dominio.com" autocomplete="email" required maxlength="254" aria-describedby="ayuda-email error-email">
+            <small id="ayuda-email" class="help">Ejemplo: usuario@dominio.com</small>
+            <span id="error-email" class="error" aria-live="polite"></span>
+        </div>
+
+        <!-- TELÉFONO -->
+        <div class="form-group">
+            <label for="telefono">Teléfono</label>
+            <input type="tel" id="telefono" name="telefono" placeholder="Ej. 612345678" autocomplete="tel" pattern="[0-9 +()-]{9,20}" maxlength="20" aria-describedby="ayuda-telefono error-telefono">
+            <small id="ayuda-telefono" class="help">Introduce un teléfono de 9 a 20 caracteres.</small>
+            <span id="error-telefono" class="error" aria-live="polite"></span>
+        </div>
+
+        <!-- CONTRASEÑA -->
+        <div class="form-group">
+            <label for="password">Contraseña <span class="required">*</span></label>
+            <input type="password" id="password" name="password" placeholder="Introduce tu contraseña" autocomplete="new-password" required minlength="12" maxlength="128" aria-describedby="ayuda-password error-password">
+            <small id="ayuda-password" class="help">Mínimo 12 caracteres.</small>
+            <button type="button" id="mostrar-password" class="boton-secundario" aria-pressed="false" aria-controls="password">Mostrar contraseña</button>
+            <span id="error-password" class="error" aria-live="polite"></span>
+        </div>
+
+        <!-- PRIVACIDAD -->
+        <div class="form-group checkbox-group">
+            <input type="checkbox" id="privacidad" name="privacidad" required aria-describedby="error-privacidad">
+            <label for="privacidad">Acepto la <a href="#" id="abrir-privacidad">política de privacidad</a> <span class="required">*</span></label>
+        </div>
+        <span id="error-privacidad" class="error"></span>
+
+        <button type="submit">Registrarse</button>
+        <div id="resultado" role="status" tabindex="-1" aria-live="polite"></div>
+    </form>
+
+    <dialog id="modal-privacidad" aria-labelledby="titulo-privacidad" aria-describedby="descripcion-privacidad">
+        <div class="modal-contenido">
+            <h2 id="titulo-privacidad">Política de Privacidad</h2>
+            <p id="descripcion-privacidad">Información sobre el tratamiento de tus datos personales.</p>
+            <div class="texto-privacidad" tabindex="0">
+                <p>Al utilizar este formulario, aceptas el tratamiento de tus datos personales conforme al RGPD...</p>
+                <p>Puedes cerrar esta ventana con la tecla Esc o el botón inferior.</p>
+            </div>
+            <div class="acciones-modal">
+                <button type="button" id="cerrar-privacidad" class="boton-secundario">Cerrar</button>
+            </div>
+        </div>
+    </dialog>
+</main>
+
+<script>
+(() => {
+    'use strict';
+
+    const form = document.getElementById('registro');
+    const modal = document.getElementById('modal-privacidad');
+    const btnAbrir = document.getElementById('abrir-privacidad');
+    const btnCerrar = document.getElementById('cerrar-privacidad');
+    const resumen = document.getElementById('resumen-errores');
+    const resultado = document.getElementById('resultado');
+    const password = document.getElementById('password');
+    let elementoAnterior = null;
+    let escalaTexto = 100;
+
+    // Herramientas de visualización: no modifican el contenido ni el orden del formulario.
+    function anunciarVista(mensaje) {
+        document.getElementById('estado-vista').textContent = mensaje;
+    }
+    function aplicarEscala() {
+        document.documentElement.style.setProperty('--tamano-texto', escalaTexto + '%');
+        anunciarVista('Tamaño de texto: ' + escalaTexto + ' por ciento.');
+    }
+    document.getElementById('aumentar-texto').addEventListener('click', () => {
+        escalaTexto = Math.min(160, escalaTexto + 10); aplicarEscala();
+    });
+    document.getElementById('reducir-texto').addEventListener('click', () => {
+        escalaTexto = Math.max(80, escalaTexto - 10); aplicarEscala();
+    });
+    document.getElementById('contraste').addEventListener('click', (event) => {
+        const activo = document.body.classList.toggle('alto-contraste');
+        event.currentTarget.setAttribute('aria-pressed', String(activo));
+        anunciarVista(activo ? 'Modo de alto contraste activado.' : 'Modo de alto contraste desactivado.');
+    });
+    document.getElementById('oscuro').addEventListener('click', (event) => {
+        const activo = document.body.classList.toggle('tema-oscuro');
+        event.currentTarget.setAttribute('aria-pressed', String(activo));
+        anunciarVista(activo ? 'Modo oscuro activado.' : 'Modo oscuro desactivado.');
+    });
+    document.getElementById('subrayar-enlaces').addEventListener('click', (event) => {
+        const activo = document.body.classList.toggle('enlaces-subrayados');
+        event.currentTarget.setAttribute('aria-pressed', String(activo));
+        anunciarVista(activo ? 'Subrayado de enlaces reforzado.' : 'Subrayado de enlaces normal.');
+    });
+    document.getElementById('restablecer').addEventListener('click', () => {
+        escalaTexto = 100;
+        document.documentElement.style.removeProperty('--tamano-texto');
+        document.body.classList.remove('alto-contraste', 'tema-oscuro', 'enlaces-subrayados');
+        document.getElementById('contraste').setAttribute('aria-pressed', 'false');
+        document.getElementById('oscuro').setAttribute('aria-pressed', 'false');
+        document.getElementById('subrayar-enlaces').setAttribute('aria-pressed', 'false');
+        anunciarVista('Opciones de visualización restablecidas.');
+    });
+
+    // Mostrar u ocultar contraseña sin perder el foco.
+    document.getElementById('mostrar-password').addEventListener('click', (event) => {
+        const mostrar = password.type === 'password';
+        password.type = mostrar ? 'text' : 'password';
+        event.currentTarget.textContent = mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña';
+        event.currentTarget.setAttribute('aria-pressed', String(mostrar));
+        password.focus();
+    });
+
+    // Diálogo nativo: gestiona Escape y el foco; se devuelve al enlace al cerrar.
+    btnAbrir.addEventListener('click', (event) => {
+        event.preventDefault();
+        elementoAnterior = btnAbrir;
+        modal.showModal();
+        btnCerrar.focus();
+    });
+    btnCerrar.addEventListener('click', () => modal.close());
+    modal.addEventListener('close', () => {
+        if (elementoAnterior) elementoAnterior.focus();
+    });
+
+    // Validación accesible: mensajes asociados, resumen con enlaces y foco al primer error.
+    const campos = Array.from(form.querySelectorAll('input'));
+    function limpiarError(input) {
+        input.removeAttribute('aria-invalid');
+        const error = document.getElementById('error-' + input.id);
+        if (error) error.textContent = '';
+    }
+    campos.forEach((input) => {
+        input.addEventListener('input', () => {
+            if (input.checkValidity()) limpiarError(input);
+        });
+        input.addEventListener('change', () => {
+            if (input.checkValidity()) limpiarError(input);
+        });
+    });
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const invalidos = campos.filter((input) => !input.checkValidity());
+
+        campos.forEach((input) => {
+            const error = document.getElementById('error-' + input.id);
+            if (!error) return;
+            if (!input.checkValidity()) {
+                input.setAttribute('aria-invalid', 'true');
+                error.textContent = input.validationMessage;
+            } else {
+                limpiarError(input);
+            }
+        });
+
+        resumen.replaceChildren();
+        if (invalidos.length) {
+            const titulo = document.createElement('p');
+            titulo.textContent = 'No se ha podido enviar el formulario. Corrige estos campos:';
+            const lista = document.createElement('ul');
+            invalidos.forEach((input) => {
+                const item = document.createElement('li');
+                const enlace = document.createElement('a');
+                enlace.href = '#' + input.id;
+                enlace.textContent = input.labels[0].textContent.replace('*', '').trim() +
+                    ': ' + input.validationMessage;
+                enlace.addEventListener('click', () => input.focus());
+                item.append(enlace);
+                lista.append(item);
+            });
+            resumen.append(titulo, lista);
+            resultado.textContent = '';
+            resumen.focus();
+            return;
+        }
+
+        resultado.textContent = '¡Registro completado con éxito! (Demostración: conecta aquí el envío real de datos.)';
+        resultado.setAttribute('role', 'status');
+        resultado.focus?.();
+    });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de registro accesible</title>
+
+    <style>
+        /* =========================================
+           1. ESTILOS GENERALES
+        ========================================= */
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.5;
+            margin: 0;
+            padding: 2rem;
+            color: #222;
+            background: #f5f5f5;
+        }
+        main { max-width: 700px; margin: auto; }
+        h1, h2, h3 { line-height: 1.3; }
+
+        /* =========================================
+           2. FORMULARIO
+        ========================================= */
+        form {
+            padding: 2rem;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; font-weight: bold; margin-bottom: 0.4rem; }
+        input:not([type="checkbox"]) {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #555;
+            border-radius: 4px;
+            font-size: 1rem;
+            background: white;
+            color: #222;
+        }
+        input::placeholder { color: #666; opacity: 1; }
+        input:focus-visible, button:focus-visible, a:focus-visible {
+            outline: 3px solid #005fcc;
+            outline-offset: 3px;
+        }
+        input[aria-invalid="true"] { border-color: #b00020; }
+        .required { color: #b00020; }
+        .help { display: block; margin-top: 0.3rem; font-size: 0.9rem; color: #444; }
+        .error { display: block; color: #b00020; font-weight: bold; margin-top: 0.3rem; }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+        }
+        .checkbox-group input {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            margin-top: 0.2rem;
+        }
+        .checkbox-group label { margin: 0; }
+
+        /* =========================================
+           3. BOTONES
+        ========================================= */
+        button {
+            padding: 0.8rem 1.5rem;
+            background: #005fcc;
+            color: white;
+            border: 2px solid #005fcc;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        button:hover:not(:disabled) { background: #003f8c; border-color: #003f8c; }
+        button:disabled { opacity: 0.55; cursor: not-allowed; }
+        #resultado { margin-top: 1rem; font-weight: bold; }
+
+        /* =========================================
+           4. VENTANA MODAL
+        ========================================= */
+        dialog {
+            width: min(90%, 650px);
+            max-height: 85vh;
+            padding: 0;
+            border: 2px solid #555;
+            border-radius: 8px;
+            color: #222;
+        }
+        dialog::backdrop { background: rgb(0 0 0 / 65%); }
+        .modal-contenido { padding: 1.5rem; }
+        .texto-privacidad {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 1rem;
+            border: 1px solid #777;
+            border-radius: 4px;
+            margin: 1rem 0;
+            background: #fff;
+        }
+        .texto-privacidad:focus-visible { outline: 3px solid #005fcc; outline-offset: 3px; }
+        .acciones-modal { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+        .boton-secundario { background: #fff; color: #222; border-color: #555; }
+        .boton-secundario:hover:not(:disabled) { background: #eee; border-color: #222; }
+
+        @media (max-width: 600px) {
+            body { padding: 1rem; }
+            form { padding: 1rem; }
+            .modal-contenido { padding: 1rem; }
+            .acciones-modal { flex-direction: column; }
+            .acciones-modal button { width: 100%; }
+        }
+    </style>
+</head>
+
+<body>
+<main>
+    <h1>Formulario de registro</h1>
+    <p>Los campos marcados con <span class="required">*</span> son obligatorios.</p>
+
+    <form id="registro" novalidate>
+        <!-- NOMBRE -->
+        <div class="form-group">
+            <label for="nombre">Nombre <span class="required">*</span></label>
+            <input type="text" id="nombre" name="nombre" placeholder="Ej. María" autocomplete="given-name" required minlength="2" maxlength="50" aria-describedby="ayuda-nombre error-nombre">
+            <small id="ayuda-nombre" class="help">Introduce tu nombre (entre 2 y 50 caracteres).</small>
+            <span id="error-nombre" class="error"></span>
+        </div>
+
+        <!-- APELLIDOS -->
+        <div class="form-group">
+            <label for="apellidos">Apellidos <span class="required">*</span></label>
+            <input type="text" id="apellidos" name="apellidos" placeholder="Ej. García López" autocomplete="family-name" required minlength="2" maxlength="100" aria-describedby="error-apellidos">
+            <span id="error-apellidos" class="error"></span>
+        </div>
+
+        <!-- EMAIL -->
+        <div class="form-group">
+            <label for="email">Correo electrónico <span class="required">*</span></label>
+            <input type="email" id="email" name="email" placeholder="Ej. usuario@dominio.com" autocomplete="email" required maxlength="254" aria-describedby="ayuda-email error-email">
+            <small id="ayuda-email" class="help">Ejemplo: usuario@dominio.com</small>
+            <span id="error-email" class="error"></span>
+        </div>
+
+        <!-- TELÉFONO -->
+        <div class="form-group">
+            <label for="telefono">Teléfono</label>
+            <input type="tel" id="telefono" name="telefono" placeholder="Ej. 612345678" autocomplete="tel" pattern="[0-9 +()-]{9,20}" maxlength="20" aria-describedby="ayuda-telefono error-telefono">
+            <small id="ayuda-telefono" class="help">Introduce un teléfono de 9 a 20 caracteres.</small>
+            <span id="error-telefono" class="error"></span>
+        </div>
+
+        <!-- CONTRASEÑA -->
+        <div class="form-group">
+            <label for="password">Contraseña <span class="required">*</span></label>
+            <input type="password" id="password" name="password" placeholder="Introduce tu contraseña" autocomplete="new-password" required minlength="12" maxlength="128" aria-describedby="ayuda-password error-password">
+            <small id="ayuda-password" class="help">Mínimo 12 caracteres.</small>
+            <span id="error-password" class="error"></span>
+        </div>
+
+        <!-- PRIVACIDAD -->
+        <div class="form-group checkbox-group">
+            <input type="checkbox" id="privacidad" name="privacidad" required aria-describedby="error-privacidad">
+            <label for="privacidad">Acepto la <a href="#" id="abrir-privacidad">política de privacidad</a> <span class="required">*</span></label>
+        </div>
+        <span id="error-privacidad" class="error"></span>
+
+        <button type="submit">Registrarse</button>
+        <div id="resultado" role="status"></div>
+    </form>
+
+    <dialog id="modal-privacidad">
+        <div class="modal-contenido">
+            <h2>Política de Privacidad</h2>
+            <div class="texto-privacidad" tabindex="0">
+                <p>Al utilizar este formulario, aceptas el tratamiento de tus datos personales conforme al RGPD...</p>
+                <p>Puedes cerrar esta ventana con la tecla Esc o el botón inferior.</p>
+            </div>
+            <div class="acciones-modal">
+                <button type="button" id="cerrar-privacidad" class="boton-secundario">Cerrar</button>
+            </div>
+        </div>
+    </dialog>
+</main>
+
+<script>
+    const form = document.getElementById('registro');
+    const modal = document.getElementById('modal-privacidad');
+    const btnAbrir = document.getElementById('abrir-privacidad');
+    const btnCerrar = document.getElementById('cerrar-privacidad');
+
+    // Gestión de la Modal
+    btnAbrir.addEventListener('click', (e) => {
+        e.preventDefault();
+        modal.showModal();
+    });
+
+    btnCerrar.addEventListener('click', () => modal.close());
+
+    // Validación y Envío
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        
+        // Breakpoint manual para depuración
+        debugger; 
+
+        let isValid = true;
+        const controls = form.querySelectorAll('input');
+
+        controls.forEach(input => {
+            const errorElement = document.getElementById(`error-${input.id}`);
+            if (errorElement) {
+                if (!input.checkValidity()) {
+                    input.setAttribute('aria-invalid', 'true');
+                    errorElement.textContent = input.validationMessage;
+                    isValid = false;
+                } else {
+                    input.setAttribute('aria-invalid', 'false');
+                    errorElement.textContent = '';
+                }
+            }
+        });
+
+        const resultado = document.getElementById('resultado');
+        if (isValid) {
+            resultado.style.color = 'green';
+            resultado.textContent = '¡Registro completado con éxito!';
+        } else {
+            resultado.style.color = '#b00020';
+            resultado.textContent = 'Error: Revisa los campos marcados.';
+        }
+    });
+</script>
+</body>
+</html>
